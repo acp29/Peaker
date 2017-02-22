@@ -7,9 +7,7 @@ the analysis of spontaneous and evoked synaptic currents or potentials.
 
 
 VERSION HISTORY
-
 v1.1  Bug fixes
-
 v1.0	Initial release
 
 
