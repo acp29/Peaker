@@ -14,7 +14,6 @@ v1.1  Bug fixes
 v1.0	Initial release
 
 
-
 REQUIREMENTS
 
 Requires Matlab. Tested on Windows MATLAB version 7.4 (R2007A) and 
