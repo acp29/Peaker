@@ -55,10 +55,10 @@ I will attempt to keep up with requests for help and for bug fixes but I do
 not plan to add much more in the way of functionality.
 
 
-Dr Andrew Penn 
-A.C.Penn@sussex.ac.uk
-Sussex Neuroscience
-School of Life Sciences
-University of Sussex
-Brighton BN1 9QG
-United Kingdom
+Dr Andrew Penn, 
+A.C.Penn@sussex.ac.uk.
+Sussex Neuroscience,
+School of Life Sciences,
+University of Sussex,
+Brighton, BN1 9QG.
+United Kingdom.
