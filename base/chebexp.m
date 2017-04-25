@@ -55,7 +55,7 @@ if isinf(n) || ~all(size(n) == 1) || n<=0 || n~=round(n)
 end
 
 if nargin < 4
- Tn = 20
+ Tn = 20;
 end
 
 % Evaluate the input arguments
