@@ -1,4 +1,4 @@
-%    Function File: [fit S] = chebexp (x, y, n)
+%    Function File: [fit S] = chebexp (x, y, n, Tn)
 %
 %     Returns the least-squares unconstrained fit of n exponential
 %     components with constant offset to XY data using the Chebyshev
@@ -39,10 +39,10 @@
 
 
 
-function [fit S] = chebexp (t, y, n)
+function [fit S] = chebexp (t, y, n, Tn)
 
 
-if nargin ~= 3
+if nargin < 3
  error('Invalid number of input arguments');
 end
 
@@ -52,6 +52,10 @@ end
 
 if isinf(n) || ~all(size(n) == 1) || n<=0 || n~=round(n)
  error('n must be a nonnegative integer');
+end
+
+if nargin < 4
+ Tn = 20
 end
 
 % Evaluate the input arguments
@@ -69,8 +73,8 @@ N = l-1;
 t = [0:N]';
 
 % Calculate the maximum order Chebyshev polynomials to generate
-if l > 30
- Tn = 30;
+if l > Tn
+ % Do nothing. Keep current value of Tn
 else
  Tn = N;
 end
