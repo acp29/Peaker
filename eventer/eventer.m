@@ -905,11 +905,11 @@ function merge_data(average,s,win,export,optimoptions,cwd)
     IEI = cell2mat(IEI);
     peak = cell2mat(peak);
     nanidx = isnan(IEI);
-    peak(nanidx) = [];
-    IEI(nanidx) = [];
-    y(:,find(nanidx)) = [];
+    %peak(nanidx) = [];
+    %IEI(nanidx) = [];
+    %y(:,find(nanidx)) = [];
     numEvents = numel(peak);
-    freq = 1/median(IEI);
+    freq = 1/nanmedian(IEI);
     events = [sample_rate(1)^-1*[0:size(y,1)-1]',y];
     if strcmp(average,'mean')
       y_avg = mean(y,2);
