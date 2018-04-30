@@ -1,8 +1,8 @@
 %     Function File: [y, k] = bounce (y, n)
 %
 %     Extend each end of the y-vector by n number of points for
-%     'bounce' end-effect correction. The output includes the
-%     extended y-vector and the number of bounces (k).
+%     'bounce' (or mirror) end-effect correction. The output
+%     includes the extended y-vector and the number of bounces (k).
 %
 %     bounce v1.0 (last updated: 16/09/2011)
 %     Author: Andrew Charles Penn
