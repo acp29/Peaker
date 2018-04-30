@@ -1198,7 +1198,7 @@ function [array,xdiff,xunit,yunit,names,notes] = MAload (filename,ch)
   array(:,1) = metadata{2}.values;
   array(:,2) = data(:,ch);
   names{2,1} = strcat('YWave',filepath(end-2:end));
-  if filepath(end-3:end) == '/000'
+  if all(filepath(end-2:end)) == '000'
     cd ..
     count = 1;
     exitflag = 0;
@@ -1217,6 +1217,7 @@ function [array,xdiff,xunit,yunit,names,notes] = MAload (filename,ch)
         exitflag = 1;
       end
     end
+    cd('000');
   else
     % Do nothing
   end
