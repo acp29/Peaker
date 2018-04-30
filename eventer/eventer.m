@@ -47,7 +47,7 @@
 %    a very weak correlation.
 %
 %  peak = eventer(file,TC,s,SF,...,'hpf',hpf) sets the -3 dB cut-off (in
-%    Hz) of the low-pass binomial filter applied to the deconvoluted wave,
+%    Hz) of the low-pass median filter applied to the deconvoluted wave,
 %    where the filtered wave is then subtracted from the deconvoluted
 %    wave. Thus, this is essentially a high-pass filter. The algorithm
 %    implements a bounce correction to avoid end effects. The default
@@ -125,7 +125,7 @@
 %    EPSCs at the mossy fibre synapse on CA3 pyramidal cells of the rat
 %    hippocampus. J Physiol. 472:615-663.
 %
-%  eventer v1.3 (last updated: 27/07/2016)
+%  eventer v1.4 (last updated: 27/07/2016)
 %  Author: Andrew Charles Penn
 %  https://www.researchgate.net/profile/Andrew_Penn/
 
@@ -402,8 +402,8 @@ function eventer(file,TC,s,SF,varargin)
   DEC(end-sample_rate+1:end) = [];
 
   % Band-pass filter the deconvoluted trace (default is 1-200 Hz)
-  DEC = hpfilter(DEC,t,hpf);
-  DEC = lpfilter(DEC,t,lpf);
+  DEC = filter1 (DEC, t, hpf, inf, 'median'); % high pass median filter
+  DEC = filter1 (DEC, t, 0, lpf, 'binomial'); % low pass binomial filter
 
   % Assign NaN to deconvoluted waves for values inside user-defined exclusion zones
   % Calculate actual recording time analysed (not including exclusion zones)
@@ -905,11 +905,11 @@ function merge_data(average,s,win,export,optimoptions,cwd)
     IEI = cell2mat(IEI);
     peak = cell2mat(peak);
     nanidx = isnan(IEI);
-    %peak(nanidx) = [];
-    %IEI(nanidx) = [];
-    %y(:,find(nanidx)) = [];
+    peak(nanidx) = [];
+    IEI(nanidx) = [];
+    y(:,find(nanidx)) = [];
     numEvents = numel(peak);
-    freq = 1/nanmedian(IEI);
+    freq = 1/median(IEI);
     events = [sample_rate(1)^-1*[0:size(y,1)-1]',y];
     if strcmp(average,'mean')
       y_avg = mean(y,2);
