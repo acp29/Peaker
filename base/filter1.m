@@ -17,8 +17,8 @@
 %     resulting trace is subtracted from the input. The filter rank is
 %     estimated from the desired cut-off value for the analagous linear
 %     filter (boxcar). The median filter does not cause the edge effects
-%     that linear filters are prone to, but is much slower. Note that in
-%     the case of the median filter, the HPF value reported is an estimate
+%     that linear filters are prone to, but is slower. Note that in the
+%     case of the median filter, the HPF value reported is an estimate
 %     of the -3 dB cut-off for the initial low-pass filtering prior to
 %     subtraction and not the -3 dB cutoff of the resulting high-pass
 %     filter. Regardless of the method specified, the LPF is always a
@@ -144,8 +144,7 @@ for i=1:size(Yl,2)
      p = ((0.443*sample_rate)/HPF);
      r=round((p-1)/2);
      HPF = 0.443 / (2*r+1) * sample_rate;
-     [ybase, tbase] = medianf (single(Yl(:,i)), tl, r); %#ok<NASGU>
-     ybase=double(ybase);
+     [ybase, tbase] = medianf (Yl(:,i), tl, r); %#ok<NASGU>
      yf=Yl(:,i)-ybase;
      if strcmp(option,'-file')
       y_autoscale=0.05*(max(Yl(:,i))-min(Yl(:,i))); y_maxlim=max(Yl(:,i))+y_autoscale; y_minlim=min(Yl(:,i))-y_autoscale; % Encoded y-axis autoscaling
