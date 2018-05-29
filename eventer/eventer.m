@@ -401,9 +401,13 @@ function eventer(file,TC,s,SF,varargin)
   DEC(1:sample_rate) = [];
   DEC(end-sample_rate+1:end) = [];
 
+  %% Band-pass filter the deconvoluted trace (default is 1-200 Hz)
+  %DEC = filter1 (DEC, t, hpf, inf, 'median'); % high pass median filter
+  %DEC = filter1 (DEC, t, 0, lpf, 'binomial'); % low pass binomial filter
+  
   % Band-pass filter the deconvoluted trace (default is 1-200 Hz)
-  DEC = filter1 (DEC, t, hpf, inf, 'median'); % high pass median filter
-  DEC = filter1 (DEC, t, 0, lpf, 'binomial'); % low pass binomial filter
+  DEC = hpfilter(DEC,t,hpf);
+  DEC = lpfilter(DEC,t,lpf);
 
   % Assign NaN to deconvoluted waves for values inside user-defined exclusion zones
   % Calculate actual recording time analysed (not including exclusion zones)
