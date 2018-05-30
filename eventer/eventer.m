@@ -406,8 +406,8 @@ function eventer(file,TC,s,SF,varargin)
   %DEC = filter1 (DEC, t, 0, lpf, 'binomial'); % low pass binomial filter
   
   % Band-pass filter the deconvoluted trace (default is 1-200 Hz)
-  DEC = hpfilter(DEC,t,hpf);
-  DEC = lpfilter(DEC,t,lpf);
+  DEC = filter1 (DEC, t, 0, lpf, 'binomial');
+  DEC = filter1 (DEC, t, hpf, inf, 'median');
 
   % Assign NaN to deconvoluted waves for values inside user-defined exclusion zones
   % Calculate actual recording time analysed (not including exclusion zones)
