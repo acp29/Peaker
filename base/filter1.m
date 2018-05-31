@@ -36,7 +36,8 @@
 %     ending given in the second input argument. If the ending option is
 %     left empty ('[]'), the function will overwrite the original file.
 %     The used cut-off values are saved in a separate file with the new
-%     filename appended with '_Fc'.
+%     filename appended with '_Fc'. The data is saved in the ephysIO hdf5-
+%     based MATLAB format with the .mat filename extension.
 %
 %     When used to band-pass filter, this function performs operations in
 %     the order: 1) High-pass, then 2) Low-pass.
