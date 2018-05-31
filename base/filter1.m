@@ -135,6 +135,11 @@ if strcmp(option,'-file')
  clf
 end
 for i=1:size(Yl,2)
+  yf = Yl(:,i);
+  if ~isinf(LPF)
+    yf = lpfilter (yf, tl, LPF);
+  end
+  yref = yf;
   if HPF > 0
     if strcmp(method,'median')
      % Analogy to a linear, boxcar filter:
@@ -144,27 +149,23 @@ for i=1:size(Yl,2)
      p = ((0.443*sample_rate)/HPF);
      r=round((p-1)/2);
      HPF = 0.443 / (2*r+1) * sample_rate;
-     [ybase, tbase] = medianf (Yl(:,i), tl, r); %#ok<NASGU>
-     yf=Yl(:,i)-ybase;
+     [ybase, tbase] = medianf (yref, tl, r); %#ok<NASGU>
+     yf=yref-ybase;
      if strcmp(option,'-file')
-      y_autoscale=0.05*(max(Yl(:,i))-min(Yl(:,i))); y_maxlim=max(Yl(:,i))+y_autoscale; y_minlim=min(Yl(:,i))-y_autoscale; % Encoded y-axis autoscaling
-      figure(2); hold on; plot(tl,Yl(:,i),'-','color',[0.75,0.75,0.75]); plot(tl,ybase,'k'); hold off; xlim([min(tl),max(tl)]); ylim([y_minlim y_maxlim]); box('off');
+      y_autoscale=0.05*(max(yref)-min(yref)); y_maxlim=max(yref)+y_autoscale; y_minlim=min(yref)-y_autoscale; % Encoded y-axis autoscaling
+      figure(2); hold on; plot(tl,yref,'-','color',[0.75,0.75,0.75]); plot(tl,ybase,'k'); hold off; xlim([min(tl),max(tl)]); ylim([y_minlim y_maxlim]); box('off');
      end
     elseif strcmp(method, 'binomial')
-     yf = hpfilter (Yl(:,i), tl, HPF);
+     yf = hpfilter (yref, tl, HPF);
      if strcmp(option,'-file')
-      y_autoscale=0.05*(max(Yl(:,i))-min(Yl(:,i))); y_maxlim=max(Yl(:,i))+y_autoscale; y_minlim=min(Yl(:,i))-y_autoscale; % Encoded y-axis autoscaling
-      figure(2); hold on; plot(tl,Yl(:,i),'-','color',[0.75,0.75,0.75]); plot(tl,Yl(:,i)-yf,'k-'); hold off; xlim([min(tl),max(tl)]); ylim([y_minlim y_maxlim]); box('off');
+      y_autoscale=0.05*(max(yref)-min(yref)); y_maxlim=max(yref)+y_autoscale; y_minlim=min(yref)-y_autoscale; % Encoded y-axis autoscaling
+      figure(2); hold on; plot(tl,yref,'-','color',[0.75,0.75,0.75]); plot(tl,yref-yf,'k-'); hold off; xlim([min(tl),max(tl)]); ylim([y_minlim y_maxlim]); box('off');
      end
    end
   elseif HPF == 0
    figure(2)
    close(2)
-   yf=Yl(:,i);
   end
- if ~isinf(LPF)
-   yf = lpfilter (yf, tl, LPF);
- end
  YF(:,i)=yf;
 end
 
