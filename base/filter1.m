@@ -192,7 +192,7 @@ if strcmp(option,'-file')
  ylabel(strcat('y-axis (',yunit,')'));
  xlabel(strcat('x-axis (',xunit,')'));
  output_data=cat(2,tl,YF); %#ok<NASGU>
- newfilename=strcat(filename,argin2,ext);
+ newfilename=strcat(filename,argin2,'.mat');
  ephysIO(newfilename,output_data,xunit,yunit,names,notes);
  if exist('filter1.output','dir') == 0
   mkdir('filter1.output');
