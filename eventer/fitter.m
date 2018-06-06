@@ -411,6 +411,7 @@ function [MSE,peak,area,tau1,tau2,modelWave] = fitter(file,TC,s,R,varargin)
   dlmwrite('taus.txt',[tau1' tau2'],'\t');
   cd ..
   fid = fopen('inp.m','w');
+  fprintf(fid,'% MSE = %d\n',MSE);
   fprintf(fid,'[peak,area,tau1,tau2] = ');
   fprintf(fid,'fitter(''%s'',[%d %d],''%s'',%d,',file,TC(1),TC(2),s,R);
   fprintf(fid,'''wave'',%i,',wave-2);
