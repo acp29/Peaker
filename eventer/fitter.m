@@ -452,7 +452,7 @@ function [MSE,peak,area,tau1,tau2,modelWave] = fitter(file,TC,s,R,varargin)
   fprintf(fid,'''lpf'',%d,',lpf);
   fprintf(fid,'''channel'',%i,',channel);
   fprintf(fid,'''config'',''%s''',config);
-  fprintf(fid,');');  
+  fprintf(fid,');');
   fclose(fid);
   cd ../..
 
