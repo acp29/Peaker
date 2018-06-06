@@ -99,7 +99,7 @@
 %  Author: Andrew Charles Penn
 %  https://www.researchgate.net/profile/Andrew_Penn/
 
-function [peak,area,tau1,tau2,modelWave] = fitter(file,TC,s,R,varargin)
+function [MSE,peak,area,tau1,tau2,modelWave] = fitter(file,TC,s,R,varargin)
 
   % Initialize
   close all
@@ -370,7 +370,7 @@ function [peak,area,tau1,tau2,modelWave] = fitter(file,TC,s,R,varargin)
   P0 = peak0 ./ (-exp(-tpeak./tau1)+exp(-tpeak./tau2));
 
   % Fit events
-  [P,tau1,tau2] = optim_fit(P0,tau1,tau2,times,R,xdiff,base,trace);
+  [P,tau1,tau2,MSE] = optim_fit(P0,tau1,tau2,times,R,xdiff,base,trace);
 
   % Calculate and plot the model trace
   hold on;plot(t,base,'g');hold off;
@@ -457,7 +457,7 @@ function [peak,area,tau1,tau2,modelWave] = fitter(file,TC,s,R,varargin)
 
 end
 
-function [P,tau1,tau2] = optim_fit(P,tau1,tau2,times,R,xdiff,base,trace)
+function [P,tau1,tau2,MSE] = optim_fit(P,tau1,tau2,times,R,xdiff,base,trace)
 
   % Adjust event amplitude and timecourse to minimize objective function
 
@@ -469,15 +469,18 @@ function [P,tau1,tau2] = optim_fit(P,tau1,tau2,times,R,xdiff,base,trace)
   p0 = log([P;tau1;tau2]);
 
   % Generate objective function
-  objfunc = @(p) nansum((trace-sum_events(p,times,xdiff,base)).^2) +...
+  objfunc = @(p,R) nansum((trace-sum_events(p,times,xdiff,base)).^2) +...
                  R * sum(sum((p(2:end,:)-p0(2:end,:)).^2,1)); % Penalty to restrain tau(s)
-
+  minfunc = @(p) objfunc(p,R);
 
   % Optimize using Nelder-Mead simplex algorithm
   options=optimset('PlotFcns',@optimplotfval,...
                    'TolFun',1e-3,'TolX',1e-3,...
                    'MaxFunEval',inf,'MaxIter',inf);
-  [p] = fminsearch(objfunc,p0,options);
+  [p,fval,exitflag] = fminsearch(minfunc,p0,options);
+  R = 0;
+  SSE = objfunc(p,R);
+  MSE = SSE/sum(~isnan(trace));
 
   % Prepare return values
   P = exp(p(1,:));
