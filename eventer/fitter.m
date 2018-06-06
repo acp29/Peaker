@@ -412,7 +412,7 @@ function [MSE,peak,area,tau1,tau2,modelWave] = fitter(file,TC,s,R,varargin)
   cd ..
   fid = fopen('inp.m','w');
   fprintf(fid,'MSE = %d;\n',MSE);
-  fprintf(fid,'[peak,area,tau1,tau2] = ');
+  fprintf(fid,'[MSE,peak,area,tau1,tau2,modelWave] = ');
   fprintf(fid,'fitter(''%s'',[%d %d],''%s'',%d,',file,TC(1),TC(2),s,R);
   fprintf(fid,'''wave'',%i,',wave-2);
   fprintf(fid,'''peak'',[');
@@ -452,7 +452,7 @@ function [MSE,peak,area,tau1,tau2,modelWave] = fitter(file,TC,s,R,varargin)
   fprintf(fid,'''lpf'',%d,',lpf);
   fprintf(fid,'''channel'',%i,',channel);
   fprintf(fid,'''config'',''%s''',config);
-  fprintf(fid,')');
+  fprintf(fid,');');  
   fclose(fid);
   cd ../..
 
