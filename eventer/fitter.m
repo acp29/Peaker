@@ -63,6 +63,11 @@
 %  peak = fitter(file,TC,s,R,...,'latency',latency) sets fitter to add
 %    a delay of magnitude equal to latency to each event time.
 %
+%  peak = fitter(file,TC,s,R,...,'artifact',artifact) sets fitter to
+%    exclude data from the start of each event for the time specified here 
+%    between. This is useful for blanking stimulus artifacts that exceed
+%    the latency of the event. By default, artifact is equal to latency.
+%
 %  peak = fitter(file,TC,s,R,...,'hpf',hpf) sets the -3 dB cut-off (in
 %    Hz) of the low-pass median filter, where the filtered wave is then
 %    subtracted from the original wave. Thus, this is essentially a
@@ -141,6 +146,7 @@ function [MSE,peak,area,tau1,tau2,modelWave] = fitter(file,TC,s,R,varargin)
   incl = 1+find(strcmp('include',options));
   excl = 1+find(strcmp('exclude',options));
   latency = 1+find(strcmp('latency',options));
+  artifact = 1+find(strcmp('artifact',options));
   hpf = 1+find(strcmp('hpf',options));
   lpf = 1+find(strcmp('lpf',options));
   channel = 1+find(strcmp('channel',options));
@@ -201,6 +207,15 @@ function [MSE,peak,area,tau1,tau2,modelWave] = fitter(file,TC,s,R,varargin)
   else
     latency = 0;
   end
+  if ~isempty(artifact)
+    try
+      artifact = options{artifact};
+    catch
+      artifact = latency;
+    end
+  else
+    artifact = latency;
+  end
   if ~isempty(hpf)
     try
       hpf = options{hpf};
@@ -232,10 +247,10 @@ function [MSE,peak,area,tau1,tau2,modelWave] = fitter(file,TC,s,R,varargin)
     try
       config = options{config};
     catch
-      config = '';
+      config = 'CC';
     end
   else
-    config = '';
+    config = 'CC';
   end
 
   %%%%%%%%%%%%%%%%%%%%%%%% CUSTOM SETTINGS %%%%%%%%%%%%%%%%%%%%%%%%
@@ -304,7 +319,7 @@ function [MSE,peak,area,tau1,tau2,modelWave] = fitter(file,TC,s,R,varargin)
   if ~isempty(pathstr)
     chdir(pathstr);
   end
-  [data,xdiff,xunit,yunit,names,notes] = ephysIO ({strcat(filename,ext),channel});
+  [data,xdiff,xunit,yunit,names,notes] = ephysIO ({strcat(filename,ext),channel}); %#ok<ASGLU>
   if wave > size(data,2)
     error('wave number exceeds data dimensions')
   end
@@ -335,7 +350,7 @@ function [MSE,peak,area,tau1,tau2,modelWave] = fitter(file,TC,s,R,varargin)
   k = ET(2)-ET(1);
   B = ones(1,n);
   for j=1:n
-    trace(i(j):i(j)+latency/xdiff-1) = NaN;
+    trace(i(j):i(j)+artifact/xdiff-1) = NaN;
     B(j) = median(trace(i(j)-50:i(j)-1));
   end
   lim = TC(2)*3 +...
@@ -378,6 +393,12 @@ function [MSE,peak,area,tau1,tau2,modelWave] = fitter(file,TC,s,R,varargin)
   figure(1);
   hold on; plot(t,modelWave,'r','linewidth',3);hold off;
   hold on; plot(t,Y,'r-');hold off;
+  xlabel('Time (s)');
+  if strcmp(config,'CC')
+    ylabel('Voltage (V)');
+  elseif strcmp(config,'VC')
+    ylabel('Current (A)');
+  end
 
   % Measure the amplitude of the peaks
   tpeak = (tau2.*tau1)./(tau2-tau1).*log(tau2./tau1);
@@ -444,10 +465,11 @@ function [MSE,peak,area,tau1,tau2,modelWave] = fitter(file,TC,s,R,varargin)
     if i == size(excl,1)
       break
     end
-    fprintf(fid,';',excl(1,:));
+    fprintf(fid,';',excl(1,:)); %#ok<CTPCT>
   end
   fprintf(fid,'],');
   fprintf(fid,'''latency'',%d,',latency);
+  fprintf(fid,'''artifact'',%d,',artifact);
   fprintf(fid,'''hpf'',%d,',hpf);
   fprintf(fid,'''lpf'',%d,',lpf);
   fprintf(fid,'''channel'',%i,',channel);
@@ -478,7 +500,7 @@ function [P,tau1,tau2,MSE] = optim_fit(P,tau1,tau2,times,R,xdiff,base,trace)
   options=optimset('PlotFcns',@optimplotfval,...
                    'TolFun',1e-3,'TolX',1e-3,...
                    'MaxFunEval',inf,'MaxIter',inf);
-  [p,fval,exitflag] = fminsearch(minfunc,p0,options);
+  [p,fval,exitflag] = fminsearch(minfunc,p0,options); %#ok<ASGLU>
   R = 0;
   SSE = objfunc(p,R);
   MSE = SSE/sum(~isnan(trace));
@@ -505,7 +527,7 @@ function [modelWave,Y] = sum_events(p,times,xdiff,base)
   m = uint32(m);
   n = uint32(n);
   M = numel(base);
-  modelWave = base;
+  modelWave = base; %#ok<*NASGU>
   i = uint32(times/xdiff);
   Y = zeros(M,n);
 
