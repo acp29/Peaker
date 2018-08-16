@@ -1,7 +1,7 @@
 % Function File: ephysIO
 %
 %  USAGE: To save a column-major XY array of electrophysiology data:
-%         ephysIO (filename,array,xunit,yunit,names,notes)
+%         ephysIO (filename,array,xunit,yunit,names,notes,datatype)
 %
 %         To load column-major XY array of electrophysiology data:
 %         [array,xdiff,xunit,yunit,names,notes,saved] = ephysIO (filename)
@@ -23,6 +23,7 @@
 %
 %  names is a cell array of strings with the title of each column of array.
 %  notes is a cell array containing comments etc.
+%  datatype for ephysIO matlab files can be 'int16' or 'int32'.
 %
 %  Read and write support is provided for Axon text files (.atf), Igor
 %  text files (.itx) and ephysIO's matlab binary file format (.mat).
@@ -56,7 +57,7 @@
 %    Igor text files (.itx)
 %    Axon text files (.atf)
 %
-%  ephysIO v1.3 (last updated: 27/07/2016)
+%  ephysIO v1.4 (last updated: 16/08/2018)
 %  Author: Andrew Charles Penn
 %  https://www.researchgate.net/profile/Andrew_Penn/
 %
@@ -76,7 +77,7 @@
 
 
 function [array,xdiff,xunit,yunit,names,notes,saved] = ...
-         ephysIO (arg1,array,xunit,yunit,names,notes)
+         ephysIO (arg1,array,xunit,yunit,names,notes,datatype)
 
   %% Evaluate input arguments (with error checking)
   % Check supported filetypes for loading
@@ -140,7 +141,7 @@ function [array,xdiff,xunit,yunit,names,notes,saved] = ...
       end
       yunit = '';
     end
-    if nargin < 5
+    if nargin < 5 | isempty(names)
       if ~isstr(yunit)
         error('yunit must be a character string')
       end
@@ -168,9 +169,18 @@ function [array,xdiff,xunit,yunit,names,notes,saved] = ...
       end
       notes={};
     end
-    if nargin == 6
+    if nargin < 7
       if ~iscell(notes)
         error('notes must be a cell array')
+      end
+      datatype='int32';
+    end
+    if nargin == 8
+      if strcmpi(filename(end-3:end),'.mat')
+        fprintf('data type only used by ephysIO HDF5 mat file');
+      end
+      if ~strcmpi(datatype,'int16') | ~strcmpi(datatype,'int32')
+        error('datatype must match be int16 or int32')
       end
     end
   end
@@ -277,7 +287,7 @@ function [array,xdiff,xunit,yunit,names,notes,saved] = ...
       end
     end
     if strcmpi(filename(end-3:end),'.mat')
-      MATsave (filename,array,xunit,yunit,names,notes);
+      MATsave (filename,array,xunit,yunit,names,notes,datatype);
     elseif strcmpi(filename(end-3:end),'.itx') || strcmpi(filename(end-4:end),'.awav')
       ITXwrite (filename,array,xunit,yunit,names,notes);
     elseif strcmpi(filename(end-3:end),'.atf')
@@ -318,7 +328,7 @@ function [data, unit, SF] = scale_units (data, unit)
 
 %--------------------------------------------------------------------------
 
-function MATsave (filename,array,xunit,yunit,names,notes)
+function MATsave (filename,array,xunit,yunit,names,notes,datatype)
 
   %% File format version 1 - no longer used
   %% Modify the X dimension data as the difference between X values to
@@ -387,10 +397,16 @@ function MATsave (filename,array,xunit,yunit,names,notes)
 
   % Scale each row of the transformed data array by a power-of-2 scaling factor
   % Power of 2 scaling is more computationally efficient
+  % Use int16 datatype for efficient storage
+  % Use int32 datatype for precision
   nrows = size(array,1);
   for i=1:nrows
     maxval = max(abs(array(i,:)));
-    scale(i,1) = fix(log2(32767/maxval));
+    if strcmpi(datatype,'int16')
+      scale(i,1) = fix(log2(32767/maxval));
+    elseif strcmpi(datatype,'int32')
+      scale(i,1) = fix(log2(2147483647/maxval));
+    end
     array(i,:) = array(i,:) * 2^scale(i,1);
   end
 
@@ -398,7 +414,11 @@ function MATsave (filename,array,xunit,yunit,names,notes)
   % Note that we store the power-of-2 exponent for the scale factor
   start = single(start);
   scale = uint8(scale);
-  array = int16(round(array));
+  if strcmpi(datatype,'int16')
+    array = int16(round(array));
+  elseif strcmpi(datatype,'int32')
+    array = int32(round(array));
+  end
   xdiff = double(xdiff);
   xname = char(xname);
   names = char(names);
@@ -450,7 +470,7 @@ function [array,xdiff,xunit,yunit,names,notes,saved] = MATload (filename)
       array(:,1) = cumsum(array(:,1));
     end
 
-  elseif isa(array,'int16')
+  elseif isa(array,'int16') | isa(array,'int32')
 
     %% File format version 2
     % Convert classes of numeric variables and transpose to column-
