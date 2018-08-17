@@ -23,10 +23,10 @@
 %
 %  names is a cell array of strings with the title of each column of array.
 %  notes is a cell array containing comments etc.
-%  datatype for ephysIO matlab files can be 'int16' or 'int32'.
+%  datatype for ephysIO HDF5/MATLAB files can be 'int16' (default) or 'int32'.
 %
 %  Read and write support is provided for Axon text files (.atf), Igor
-%  text files (.itx) and ephysIO's matlab binary file format (.mat).
+%  text files (.itx) and ephysIO HDF5/MATLAB binary file format (.mat).
 %
 %  Tab-delimited text files (.txt) or comma-separated values text files
 %  (.csv) containing the data array in the above format can also be read.
@@ -173,14 +173,14 @@ function [array,xdiff,xunit,yunit,names,notes,saved] = ...
       if ~iscell(notes)
         error('notes must be a cell array')
       end
-      datatype='int32';
+      datatype='int16';
     end
     if nargin == 8
       if strcmpi(filename(end-3:end),'.mat')
-        fprintf('data type only used by ephysIO HDF5 mat file');
+        fprintf('datatype only used by ephysIO HDF5/MATLAB file format');
       end
       if ~strcmpi(datatype,'int16') | ~strcmpi(datatype,'int32')
-        error('datatype must match be int16 or int32')
+        error('string defining the datatype must match either int16 or int32')
       end
     end
   end
